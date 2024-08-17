@@ -11,7 +11,6 @@ fn timeit<T, F>(label: &str, f: F) -> T where F: FnOnce()->T  {
 }
 
 use std::fs::File;
-use std::str::FromStr;
 use image::ColorType;
 use image::png::PngEncoder;
 use num::Complex;
@@ -66,4 +65,21 @@ pub fn main(){
     write_image(&args[2], &pixels, bounds).expect("error writing PNG file");
 
     println!("open the file {} to view the mandelbrot image", &args[1]);
+}
+
+#[test]
+fn test_performance() {
+    let bounds = (4096, 2560);
+    let upper_left = Complex { re: -1.20, im: 0.35 };
+    let lower_right = Complex { re: -1.0, im: 0.20 };
+    let mut pixels = vec![0; bounds.0 * bounds.1];
+    timeit("render cpu.    ", || {
+        cpu::render(&mut pixels, bounds, upper_left, lower_right)
+    });
+    timeit("render cpu_par ", || {
+        cpu_par::render(&mut pixels, bounds, upper_left, lower_right)
+    });
+    timeit("render gpu.    ", || {
+        gpu::render(&mut pixels, bounds, upper_left, lower_right)
+    });
 }

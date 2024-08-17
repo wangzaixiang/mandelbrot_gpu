@@ -1,7 +1,4 @@
-use std::ops::Bound;
 use num::Complex;
-use wgpu::{BindGroup, Device};
-use wgpu::core::resource::StagingBuffer;
 use wgpu::util::DeviceExt;
 
 pub fn render(pixes: &mut [u8],
@@ -74,8 +71,7 @@ async fn render_gpu(pixes: &mut [u8],
         bind_group
     }
 
-    fn build_encoder(device: &wgpu::Device, pipeline: &wgpu::ComputePipeline, bind_group: BindGroup,
-                     bounds: (usize, usize), // 0: width, 1: height
+    fn build_encoder(device: &wgpu::Device, pipeline: &wgpu::ComputePipeline, bind_group: wgpu::BindGroup,
                      size: usize, storage_buffer: &wgpu::Buffer, staging_buffer: &wgpu::Buffer) -> wgpu::CommandEncoder {
 
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
@@ -85,14 +81,11 @@ async fn render_gpu(pixes: &mut [u8],
         let mut cpass = encoder.begin_compute_pass( &wgpu::ComputePassDescriptor {
             label: Some("mandelbrot compute pass"),
             timestamp_writes: None
-        }); ;
+        });
         cpass.set_pipeline(pipeline);
         cpass.set_bind_group(0, &bind_group, &[]);
         cpass.insert_debug_marker("compute pass");
         cpass.dispatch_workgroups( size as u32 / 256, 1, 1);
-
-        println!("dispatch workgroups: {}", size/256);
-        // cpass.dispatch_workgroups( size as u32, 1, 1);
         drop(cpass); // pass_end
 
         encoder.copy_buffer_to_buffer(storage_buffer, 0, staging_buffer, 0, size as u64 * std::mem::size_of::<u32>() as u64);
@@ -105,7 +98,7 @@ async fn render_gpu(pixes: &mut [u8],
     let pipeline = create_compute_pipeline(&device, &module);
 
     // TODO change to BufferUsage::WRITE to avoid copying
-    let mut pixes_u32: Vec<u32> = pixes.iter().map(|&x| x as u32).collect();
+    let pixes_u32: Vec<u32> = pixes.iter().map(|&x| x as u32).collect();
     let pixes_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
         label: Some("pixes buffer"),
         contents: bytemuck::cast_slice(&pixes_u32),
@@ -139,8 +132,8 @@ async fn render_gpu(pixes: &mut [u8],
     let bind_group = build_bind_group(&device, &pipeline,
         &pixes_buffer, &bounds_buffer, &upper_left_buffer, &lower_right_buffer);
 
-    let mut encoder = build_encoder(&device, &pipeline, bind_group,
-                                    bounds, bounds.0 * bounds.1,
+    let encoder = build_encoder(&device, &pipeline, bind_group,
+                                    bounds.0 * bounds.1,
                                     &pixes_buffer, &staging_buffer);
 
     queue.submit(Some(encoder.finish()));

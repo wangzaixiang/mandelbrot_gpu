@@ -1,5 +1,23 @@
+# Mandelbrot Set Generate, CPU vs GPU
 
-running `mandlebrot output.jpg 4096x2160 -1.20,0.35  -1,0.20` 
-1. cpu 1 threads: 2.665s
-2. into par: 0.353s, 7.5x faster
-3. write a gpu version using wgpu-rs
+## build and running
+```bash
+
+cargo build --release
+
+# run with cpu(1 thread)
+target/release/mandlebrot cpu cpu.png 4096x2160 -1.20,0.35  -1,0.20
+
+# run with cpu(parallel)
+target/release/mandlebrot cpu_par cpu_par.png 4096x2160 -1.20,0.35  -1,0.20  
+
+# run with gpu
+target/release/mandlebrot gpu gpu.png 4096x2160 -1.20,0.35  -1,0.20  
+```
+
+## Result
+
+| CPU(1 thread) | CPU(parallel) | GPU    |
+|---------------|---------------|--------|
+| 3.097s        | 0.368s        | 0.064s |
+| 1x            | 8.4x          | 48.4x  |

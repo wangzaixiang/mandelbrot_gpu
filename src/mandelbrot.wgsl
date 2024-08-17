@@ -43,11 +43,6 @@ fn norm_sqr(z: Complex) -> f32 {
     return z.re * z.re + z.im * z.im;
 }
 
-fn iter(z: Complex, c: Complex) -> Complex {
-    var z2 = addComplex(mulComplex(z, z), c);
-    return z2;
-}
-
 @compute
 @workgroup_size(256)
 fn main( @builtin(global_invocation_id) global_id: vec3<u32>) {
