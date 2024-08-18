@@ -46,7 +46,7 @@ fn norm_sqr(z: Complex) -> f32 {
 @compute
 @workgroup_size(256)
 fn main( @builtin(global_invocation_id) global_id: vec3<u32>) {
-    let i = global_id.x;
+    let i = global_id.y * 256 + global_id.x;
 
     let r: u32 = i / bounds.x;  // row
     let c: u32 = i % bounds.x;  // column

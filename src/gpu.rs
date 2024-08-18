@@ -85,7 +85,7 @@ async fn render_gpu(pixes: &mut [u8],
         cpass.set_pipeline(pipeline);
         cpass.set_bind_group(0, &bind_group, &[]);
         cpass.insert_debug_marker("compute pass");
-        cpass.dispatch_workgroups( size as u32 / 256, 1, 1);
+        cpass.dispatch_workgroups( 1, size as u32 / 256, 1 );
         drop(cpass); // pass_end
 
         encoder.copy_buffer_to_buffer(storage_buffer, 0, staging_buffer, 0, size as u64 * std::mem::size_of::<u32>() as u64);

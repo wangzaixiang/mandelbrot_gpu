@@ -64,7 +64,7 @@ pub fn main(){
 
     write_image(&args[2], &pixels, bounds).expect("error writing PNG file");
 
-    println!("open the file {} to view the mandelbrot image", &args[1]);
+    eprintln!("open the file {} to view the mandelbrot image", &args[1]);
 }
 
 #[test]
